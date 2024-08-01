@@ -29,7 +29,7 @@ exports.handleRegister = async (req, res, next) => {
     });
   } catch (err) {
     console.log(err);
-    res.sendStatus(500);
+    next(err);
   }
 };
 
@@ -49,8 +49,7 @@ exports.handleLogin = async (req, res, next) => {
   // 5. compare the found password
   // return 401 if not same
   const isSame = await bcrypt.compare(password, foundUser.password);
-  if (!isSame)
-    res.status(401).message({ message: 'email or password is wrong!' });
+  if (!isSame) res.status(401).json({ message: 'email or password is wrong!' });
   // 6. create refresh and access token
   const refreshToken = jwt.sign({ email }, process.env.JWT_REFRESH_SECRET, {
     expiresIn: '1d',
@@ -96,7 +95,7 @@ exports.handleLogout = async (req, res, next) => {
     res.sendStatus(205);
   } catch (err) {
     console.log(err.message);
-    res.sendStatus(500);
+    next(err);
   }
 };
 
@@ -134,6 +133,6 @@ exports.handleRefreshToken = async (req, res, next) => {
     );
   } catch (err) {
     console.log(err);
-    res.sendStatus(500);
+    next(err);
   }
 };

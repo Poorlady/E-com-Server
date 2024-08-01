@@ -2,3 +2,4 @@
 /node_modules
 # ignore the .env file
 /.env
+# igoner log folder
