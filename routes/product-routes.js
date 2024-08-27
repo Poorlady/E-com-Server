@@ -5,6 +5,7 @@ const {
   handleEditProduct,
   handleGetProduct,
   handleDeleteProduct,
+  handleGetProducts,
 } = require('../controllers/product-controller');
 const handleDirname = require('../middleware/fileName');
 const router = express.Router();
@@ -15,6 +16,8 @@ router.post(
   upload.single('photos'),
   handleAddProduct
 );
+
+router.post('/product/get-products', upload.none(), handleGetProducts);
 
 router.route('/product/:id').get(handleGetProduct).delete(handleDeleteProduct);
 

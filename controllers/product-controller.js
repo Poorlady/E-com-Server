@@ -7,12 +7,13 @@ exports.handleGetProduct = async (req, res, next) => {
   // if there is no id return error 400
   if (!id) res.status(400).json({ message: 'Id Product is necessary' });
   try {
-    // find the product with specified id
+    // find the product first
     const product = await ProductModel.findById(id).exec();
-    // if not product found return 404 error
-    if (!product) res.status(404).json({ message: 'No Product Found' });
+    // if no product found return 404
+    if (!product)
+      res.status(404).json({ message: 'Product with provided id not found' });
     // if found return 200 with product data
-    res.status(200).json({ message: 'Product found', data: product });
+    else res.status(200).json({ message: 'Product found', data: product });
   } catch (err) {
     console.log(err);
     next(err);
@@ -35,7 +36,7 @@ exports.handleAddProduct = async (req, res, next) => {
     const product = {
       title,
       description,
-      categories,
+      categories: categories.map((cat) => cat.toLowerCase()),
       skus,
       images: `${process.env.SERVER}/${pathToDB}`,
       slug: title.replace(' ', '-').toLowerCase(),
@@ -71,7 +72,8 @@ exports.handleEditProduct = async (req, res, next) => {
     // get the body props minus the id
     const body = { ...req.body };
     delete body.id;
-
+    const { categories } = body;
+    const mappedCategories = categories.map((cat) => cat.toLowerCase());
     // get the new image path
     const filePath = req.file.path;
     // create the path to save db
@@ -80,6 +82,7 @@ exports.handleEditProduct = async (req, res, next) => {
     const newProduct = {
       ...product.doc,
       ...body,
+      categories: mappedCategories || product.categories,
       images: pathToDB || product.images,
     };
     // update the product with new value
@@ -115,6 +118,43 @@ exports.handleDeleteProduct = async (req, res, next) => {
     await ProductModel.findByIdAndDelete(id);
     // return 204 status
     res.status(204).json({ message: 'Product has been deleted' });
+  } catch (err) {
+    console.log(err);
+    next(err);
+  }
+};
+
+exports.handleGetProducts = async (req, res, next) => {
+  let DEFAULT_LIMIT = 10;
+  let DEFAULT_PAGE = 1;
+  // get the page, limit, and search
+  const { limit, page, search } = req.body;
+
+  if (!limit || !page)
+    res.status(400).json({ message: 'Please provide limit and page value' });
+
+  try {
+    // find products with limit, page, and search
+    let pageToPass = parseInt(page) || DEFAULT_PAGE;
+    let limitToPass = parseInt(limit) || DEFAULT_LIMIT;
+
+    const result = await ProductModel.find({
+      $or: [{ title: search }, { categories: { $in: [search] } }],
+    })
+      .skip((pageToPass - 1) * limitToPass)
+      .limit(limitToPass);
+    // count all document with the filter
+    const count = await ProductModel.where({
+      $or: [{ title: search }, { categories: { $in: [search] } }],
+    }).countDocuments();
+
+    // return the products data
+    res.status(200).json({
+      message: 'Success Find Data!',
+      data: result,
+      page: pageToPass,
+      pages: Math.ceil(count / limit),
+    });
   } catch (err) {
     console.log(err);
     next(err);

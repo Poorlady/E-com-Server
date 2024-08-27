@@ -1,1 +1,6 @@
 T, 27/08/2024	22:21:00 | ReferenceError - path is not defined 
+T, 27/08/2024	23:09:46 | Error - Cannot set headers after they are sent to the client 
+T, 27/08/2024	23:10:11 | Error - Cannot set headers after they are sent to the client 
+T, 27/08/2024	23:12:00 | Error - Cannot set headers after they are sent to the client 
+T, 27/08/2024	23:12:28 | Error - Cannot set headers after they are sent to the client 
+T, 27/08/2024	23:14:18 | Error - Cannot set headers after they are sent to the client 
