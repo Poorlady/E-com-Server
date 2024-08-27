@@ -3,3 +3,4 @@
 # ignore the .env file
 /.env
 # igoner log folder
+/log
