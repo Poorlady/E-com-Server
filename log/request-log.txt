@@ -1,1 +1,8 @@
-W, 21/08/2024	22:52:02 | [POST] : /api/auth-login - undefined
+T, 27/08/2024	22:05:02 | [GET] : /api/product/66cde76fc84f6cb0ac70a5bf - undefined 
+T, 27/08/2024	22:05:07 | [GET] : /api/product/66cde76fc84f6cb0ac70a5bf - undefined 
+T, 27/08/2024	22:18:14 | [GET] : /api/product/66cde76fc84f6cb0ac70a5bf - undefined 
+T, 27/08/2024	22:19:09 | [DELETE] : /api/product/66cde76fc84f6cb0ac70a5bf - undefined 
+T, 27/08/2024	22:20:29 | [POST] : /api/product/add - undefined 
+T, 27/08/2024	22:20:51 | [GET] : /api/product/66cdeebd59aa86ed30ecac17 - undefined 
+T, 27/08/2024	22:21:00 | [DELETE] : /api/product/66cdeebd59aa86ed30ecac17 - undefined 
+T, 27/08/2024	22:21:52 | [DELETE] : /api/product/66cdeebd59aa86ed30ecac17 - undefined 

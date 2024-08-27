@@ -6,11 +6,11 @@ const { format } = require('date-fns');
 // if not then create one
 // write log to file using morgan
 
-exports.logger = (message, filename) => {
+exports.logger = async (message, filename) => {
   const formatedMessage = `${format(
     new Date(),
     'EEEEE, dd/MM/yyyy\tHH:mm:ss'
-  )} | ${message}`;
+  )} | ${message} \n`;
   try {
     const logFolder = path.join(__dirname, '..', 'log');
     if (!fs.existsSync(path.join(__dirname, '..', 'log', filename))) {
@@ -19,9 +19,12 @@ exports.logger = (message, filename) => {
       });
     }
     // const message = `[${req.hostname}] : ${req.method} - ${req.path}`;
-    fs.writeFileSync(
+    fs.appendFile(
       path.join(__dirname, '..', 'log', filename),
-      formatedMessage
+      formatedMessage,
+      (err) => {
+        if (err) throw err;
+      }
     );
   } catch (err) {
     console.log(err);
