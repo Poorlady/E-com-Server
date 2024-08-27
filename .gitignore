@@ -1,6 +1,8 @@
 # ignore all node modules
-/node_modules
+/node_modules/
 # ignore the .env file
 /.env
 # igoner log folder
-/log
+log/
+# ignore public folder
+public/uploads
