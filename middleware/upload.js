@@ -6,16 +6,20 @@ const { v4: uuidv4 } = require('uuid');
 const allowedFiles = ['jpg', 'jpeg', 'png'];
 
 const upload = multer({
-  limits: 800000,
+  limits: {
+    fileSize: 1024 * 1024 * 10,
+  },
   storage: multer.diskStorage({
     destination: function (req, file, cb) {
-      let pathDir = path.join('public', 'uploads', req.dir.join('/'));
+      let subDir = file.fieldname;
+      let pathDir = path.join('public', 'uploads', subDir);
       fs.mkdirSync(pathDir, { recursive: true });
       cb(null, pathDir);
     },
     filename: function (req, file, cb) {
+      let fileName = uuidv4();
       let ext = path.extname(file.originalname);
-      cb(null, req.fileName + ext);
+      cb(null, fileName + ext);
     },
   }),
   fileFilter: (req, file, cb) => {

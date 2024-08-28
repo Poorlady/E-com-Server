@@ -1,4 +1,8 @@
-const { pathCreator, handleDeleteDir } = require('../helper/file-handler');
+const {
+  pathCreator,
+  handleDeleteFile,
+  formatToServerDir,
+} = require('../helper/file-handler');
 const ProductModel = require('../models/Product');
 
 exports.handleGetProduct = async (req, res, next) => {
@@ -27,9 +31,13 @@ exports.handleAddProduct = async (req, res, next) => {
   if (!title || !description || skus.length === 0)
     res.status(400).json({ message: 'title and description is required' });
   // get the unique file name defined on multer
-  const filePath = req.file.path;
+  const thumbnail = req.files.thumbnail[0];
+  const images = req.files.images;
 
-  const pathToDB = pathCreator(filePath);
+  const thumbnailPath = `${process.env.SERVER}/${pathCreator(thumbnail.path)}`;
+  const imagesPath = images.map(
+    (image) => `${process.env.SERVER}/${pathCreator(image.path)}`
+  );
 
   try {
     // Create the product object
@@ -38,8 +46,9 @@ exports.handleAddProduct = async (req, res, next) => {
       description,
       categories: categories.map((cat) => cat.toLowerCase()),
       skus,
-      images: `${process.env.SERVER}/${pathToDB}`,
-      slug: title.replace(' ', '-').toLowerCase(),
+      thumbnail: thumbnailPath,
+      images: [...imagesPath],
+      slug: title.replaceAll(' ', '-').toLowerCase(),
     };
 
     // // save it to mongo
@@ -53,6 +62,7 @@ exports.handleAddProduct = async (req, res, next) => {
 };
 
 exports.handleEditProduct = async (req, res, next) => {
+  let newImagesPath, newThumbnailPath;
   // check id
   const { id } = req.body;
   // if no id found return 400 error
@@ -64,26 +74,44 @@ exports.handleEditProduct = async (req, res, next) => {
     if (!product) res.status(404).json({ message: 'Product not found!' });
 
     // get the directory of the current image of the product
-    const currentPath = product.images;
-    const dir = currentPath.split('/')[4];
-    // delete the  directory contain product image
-    await handleDeleteDir(dir);
+    if (req.files.thumbnail) {
+      const currentPath = product.thumbnail;
+      const dir = formatToServerDir(currentPath);
+      // delete the  directory contain product image
+      await handleDeleteFile(dir);
+
+      // get the new image path
+      const thumbnail = req.files.thumbnail[0];
+      // create the path to save db
+      newThumbnailPath = `${process.env.SERVER}/${pathCreator(thumbnail.path)}`;
+    }
+
+    if (req.files.images) {
+      const imagesPath = product.images;
+      const dirs = imagesPath.map((image) => formatToServerDir(image));
+      // delete the  directory contain product image
+      dirs.forEach(async (dir) => await handleDeleteFile(dir));
+      // get the new image path
+      const images = req.files.images;
+      // create the path to save db
+      newImagesPath = images?.map(
+        (image) => `${process.env.SERVER}/${pathCreator(image.path)}`
+      );
+    }
 
     // get the body props minus the id
     const body = { ...req.body };
     delete body.id;
     const { categories } = body;
     const mappedCategories = categories.map((cat) => cat.toLowerCase());
-    // get the new image path
-    const filePath = req.file.path;
-    // create the path to save db
-    const pathToDB = pathCreator(filePath);
+
     // create new object with updated value
     const newProduct = {
       ...product.doc,
       ...body,
       categories: mappedCategories || product.categories,
-      images: pathToDB || product.images,
+      thumbnail: newThumbnailPath || product.thumbnail,
+      images: newImagesPath || product.images,
     };
     // update the product with new value
     const result = await ProductModel.findByIdAndUpdate(id, newProduct);
@@ -111,9 +139,9 @@ exports.handleDeleteProduct = async (req, res, next) => {
       res.status(404).json({ message: 'Product with provided id not found' });
     // get the directory of the current image of the product
     const currentPath = product.images;
-    const dir = currentPath.split('/')[4];
+    const dir = formatToServerDir(currentPath);
     // delete the  directory contain product image
-    await handleDeleteDir(dir);
+    await handleDeleteFile(dir);
     // delete the product based on provided id
     await ProductModel.findByIdAndDelete(id);
     // return 204 status

@@ -17,3 +17,13 @@ exports.handleDeleteDir = async (dir) => {
     }
   );
 };
+
+exports.handleDeleteFile = async (dir) => {
+  await fs.unlink(path.join('public', 'uploads', dir), (err) => {
+    if (err) throw new Error(err);
+  });
+};
+
+exports.formatToServerDir = (dir) => {
+  return dir.split('/').slice(4).join('/');
+};

@@ -7,13 +7,16 @@ const {
   handleDeleteProduct,
   handleGetProducts,
 } = require('../controllers/product-controller');
-const handleDirname = require('../middleware/fileName');
+// const handleDirname = require('../middleware/fileName');
 const router = express.Router();
 
 router.post(
   '/product/add',
-  handleDirname,
-  upload.single('photos'),
+  // handleDirname,
+  upload.fields([
+    { name: 'thumbnail', maxCount: 1 },
+    { name: 'images', maxCount: 8 },
+  ]),
   handleAddProduct
 );
 
@@ -23,8 +26,11 @@ router.route('/product/:id').get(handleGetProduct).delete(handleDeleteProduct);
 
 router.put(
   '/product/edit',
-  handleDirname,
-  upload.single('photos'),
+  // handleDirname,
+  upload.fields([
+    { name: 'thumbnail', maxCount: 1 },
+    { name: 'images', maxCount: 5 },
+  ]),
   handleEditProduct
 );
 
